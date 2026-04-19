@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicFix - {% block title %}{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#0F172A',
+                        accent: '#3B82F6',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="bg-slate-200 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-navy text-white sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0">
+                    <a href="{{ url_for('index') }}" class="text-2xl font-bold font-poppins flex items-center gap-2">
+                        <i class="fas fa-city text-accent"></i> CivicFix
+                    </a>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="{{ url_for('index') }}" class="hover:text-accent px-3 py-2 rounded-md font-medium transition">Dashboard</a>
+                        
+                        {% if 'user_id' in session %}
+                            <a href="{{ url_for('report_issue') }}" class="bg-accent hover:bg-blue-600 px-4 py-2 rounded-md font-medium transition shadow">
+                                <i class="fas fa-plus mr-1"></i> Report Issue
+                            </a>
+                            <a href="{{ url_for('my_issues') }}" class="hover:text-accent px-3 py-2 rounded-md font-medium transition">My Issues</a>
+                            
+                            {% if session.get('role') == 'admin' %}
+                                <a href="{{ url_for('admin_panel') }}" class="hover:text-yellow-400 text-yellow-500 px-3 py-2 rounded-md font-medium transition">
+                                    <i class="fas fa-tools"></i> Admin
+                                </a>
+                            {% endif %}
+                            
+                            <a href="{{ url_for('logout') }}" class="text-red-400 hover:text-red-300 px-3 py-2 rounded-md font-medium transition">Logout</a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="hover:text-accent px-3 py-2 rounded-md font-medium transition">Login</a>
+                            <a href="{{ url_for('register') }}" class="bg-accent hover:bg-blue-600 px-4 py-2 rounded-md font-medium transition shadow">Sign Up</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none transition">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-700">
+                <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700">Dashboard</a>
+                {% if 'user_id' in session %}
+                    <a href="{{ url_for('report_issue') }}" class="block px-3 py-2 rounded-md text-base font-medium text-accent">Report Issue</a>
+                    <a href="{{ url_for('my_issues') }}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700">My Issues</a>
+                    {% if session.get('role') == 'admin' %}
+                         <a href="{{ url_for('admin_panel') }}" class="block px-3 py-2 rounded-md text-base font-medium text-yellow-500">Admin Panel</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}" class="block px-3 py-2 rounded-md text-base font-medium text-red-500">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700">Login</a>
+                    <a href="{{ url_for('register') }}" class="block px-3 py-2 rounded-md text-base font-medium text-accent hover:bg-gray-700">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="absolute top-20 left-0 right-0 z-50 flex flex-col items-center pointer-events-none px-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-banner pointer-events-auto w-full max-w-lg mb-2 rounded-lg shadow-lg p-4 flex items-center justify-between transition-opacity duration-300
+                    {% if category == 'error' %}bg-red-100 text-red-800 border-l-4 border-red-500
+                    {% elif category == 'success' %}bg-green-100 text-green-800 border-l-4 border-green-500
+                    {% else %}bg-blue-100 text-blue-800 border-l-4 border-blue-500{% endif %}">
+                        <div class="flex items-center gap-3">
+                            {% if category == 'error' %}<i class="fas fa-exclamation-circle text-xl"></i>
+                            {% elif category == 'success' %}<i class="fas fa-check-circle text-xl"></i>
+                            {% else %}<i class="fas fa-info-circle text-xl"></i>{% endif %}
+                            <span class="font-medium">{{ message }}</span>
+                        </div>
+                        <button class="dismiss-flash text-gray-500 hover:text-gray-700 transition">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Toast Notifier -->
+    <div id="toast" class="toast">
+        <i id="toast-icon" class="fas fa-info-circle text-xl"></i>
+        <span id="toast-msg" class="font-medium text-gray-800">Notification</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t mt-auto">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-gray-500 flex items-center justify-center gap-2">
+                <i class="fas fa-city text-gray-400"></i>
+                CivicFix Platform &copy; 2026. Empowering Citizens.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

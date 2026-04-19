@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Report Issue{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto fade-in">
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        
+        <div class="bg-navy p-6 md:p-8 text-white relative">
+            <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] mix-blend-overlay"></div>
+            <div class="relative z-10 flex items-center gap-4">
+                <div class="bg-white/20 p-3 rounded-full backdrop-blur-sm">
+                    <i class="fas fa-camera text-3xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-extrabold font-poppins text-white">Report an Issue</h2>
+                    <p class="text-gray-300 mt-1">Found a hazard? Let the city know to get it fixed.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-6 md:p-8">
+            <form action="{{ url_for('report_issue') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="col-span-1 md:col-span-2">
+                        <label for="title" class="block text-sm font-semibold text-gray-700 mb-1">Issue Title</label>
+                        <input type="text" id="title" name="title" required placeholder="e.g. Deep pothole on Main St." class="focus:ring-accent focus:border-accent block w-full border-gray-300 rounded-lg py-3 px-4 bg-gray-50 border shadow-sm">
+                    </div>
+                    
+                    <div>
+                        <label for="category" class="block text-sm font-semibold text-gray-700 mb-1">Category</label>
+                        <select id="category" name="category" required class="focus:ring-accent focus:border-accent w-full border-gray-300 rounded-lg py-3 px-4 bg-gray-50 border shadow-sm appearance-none">
+                            <option value="" disabled selected>Select Category</option>
+                            <option value="Pothole">Pothole</option>
+                            <option value="Manhole">Manhole Cove Missing</option>
+                            <option value="Flooding">Flooding / Drainage</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="location_text" class="block text-sm font-semibold text-gray-700 mb-1">Precise Location</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-map-marker-alt text-gray-400"></i>
+                            </div>
+                            <input type="text" id="location_text" name="location_text" required placeholder="123 Broad St..." class="focus:ring-accent focus:border-accent block w-full pl-10 border-gray-300 rounded-lg py-3 px-4 bg-gray-50 border shadow-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="description" class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+                    <textarea id="description" name="description" rows="4" required placeholder="Provide details like severity, size, or how long it's been there." class="focus:ring-accent focus:border-accent block w-full border-gray-300 rounded-lg py-3 px-4 bg-gray-50 border shadow-sm"></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Photo</label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition p-8 relative cursor-pointer" id="drop-area">
+                        <div class="space-y-1 text-center">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                            <div class="flex text-sm text-gray-600 justify-center">
+                                <label for="image" class="relative cursor-pointer bg-white rounded-md font-medium text-accent hover:text-blue-500 focus-within:outline-none px-2 underline">
+                                    <span>Upload a file</span>
+                                    <input id="image" name="image" type="file" accept="image/*" class="sr-only">
+                                </label>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                        </div>
+                        <!-- Provide a quick filename indicator (could use more JS) -->
+                        <div id="file-name" class="absolute bottom-2 text-sm font-semibold text-accent hidden"></div>
+                    </div>
+                </div>
+                
+                <div class="pt-4 border-t border-gray-100 flex justify-end">
+                    <button type="submit" onclick="this.innerHTML='<i class=\'fas fa-spinner fa-spin mr-2\'></i> Submitting...'" class="bg-gradient-to-r from-accent to-blue-600 border border-transparent rounded-lg shadow-md hover:shadow-lg text-white font-bold py-3 px-8 transition transform hover:-translate-y-0.5 w-full sm:w-auto">
+                        Submit Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('image');
+    const fileNameDisplay = document.getElementById('file-name');
+    fileInput.addEventListener('change', function() {
+        if(this.files && this.files.length > 0) {
+            fileNameDisplay.innerText = "Selected: " + this.files[0].name;
+            fileNameDisplay.classList.remove('hidden');
+        } else {
+            fileNameDisplay.classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}

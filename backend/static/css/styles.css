@@ -1,0 +1,97 @@
+:root {
+  --nav-bg: #0F172A; /* Deep Navy */
+  --body-bg: #E2E8F0; /* Slate 200 for deep contrast with white cards */
+  --card-bg: #FFFFFF;
+  --accent-blue: #3B82F6;
+  --status-fixed: #10B981;
+  --status-progress: #F59E0B;
+  --status-reported: #EF4444;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--body-bg);
+  color: #1E293B;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Issue Card Hover Lift */
+.issue-card {
+  transition: all 0.3s ease;
+  border-radius: 0.75rem;
+}
+
+.issue-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* Status Border Identifiers */
+.border-status-Reported { border-left: 4px solid var(--status-reported) !important; }
+.border-status-Under.Review { border-left: 4px solid var(--status-progress) !important; }
+.border-status-In.Progress { border-left: 4px solid var(--status-progress) !important; }
+.border-status-Fixed { border-left: 4px solid var(--status-fixed) !important; }
+
+/* Status Text/Pill Identifiers */
+.bg-status-Reported { background-color: var(--status-reported); color: white; }
+.bg-status-Under.Review { background-color: var(--status-progress); color: white; }
+.bg-status-In.Progress { background-color: var(--status-progress); color: white; }
+.bg-status-Fixed { background-color: var(--status-fixed); color: white; }
+
+/* Vote Button Ripple */
+.vote-btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.1s;
+}
+.vote-btn:active {
+  transform: scale(0.95);
+}
+
+/* Skeleton Loading */
+.skeleton {
+  background: #e2e8f0;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s infinite;
+}
+
+@keyframes skeletonLoading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: -100px;
+  right: 20px;
+  min-width: 250px;
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  transition: bottom 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.toast.show {
+  bottom: 20px;
+}

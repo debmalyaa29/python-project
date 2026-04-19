@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8 fade-in">
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
+                <i class="fas fa-user-plus text-2xl text-accent"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-navy font-poppins">Create Account</h2>
+            <p class="mt-2 text-sm text-gray-500">Join CivicFix and start making a difference.</p>
+        </div>
+        
+        <form class="space-y-6" action="{{ url_for('register') }}" method="POST">
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                <div class="mt-1 relative rounded-md shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-user text-gray-400"></i>
+                    </div>
+                    <input id="username" name="username" type="text" required class="focus:ring-accent focus:border-accent block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50 border">
+                </div>
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                <div class="mt-1 relative rounded-md shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-key text-gray-400"></i>
+                    </div>
+                    <input id="password" name="password" type="password" required class="focus:ring-accent focus:border-accent block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50 border">
+                </div>
+            </div>
+            
+            <div>
+                <label for="role" class="block text-sm font-medium text-gray-700">Account Type</label>
+                <div class="mt-1 relative rounded-md shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-id-badge text-gray-400"></i>
+                    </div>
+                    <select id="role" name="role" class="focus:ring-accent focus:border-accent block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50 border appearance-none">
+                        <option value="citizen">Citizen Account</option>
+                        <option value="admin">Government Admin</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition transform hover:-translate-y-0.5">
+                    Register
+                </button>
+            </div>
+        </form>
+        
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+                Already have an account? 
+                <a href="{{ url_for('login') }}" class="font-semibold text-accent hover:text-blue-500">Sign in here</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

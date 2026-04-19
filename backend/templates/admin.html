@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto fade-in">
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-3">
+            <div class="bg-yellow-100 text-yellow-600 p-3 rounded-xl border border-yellow-200 shadow-sm">
+                <i class="fas fa-user-shield text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-navy font-poppins">Admin Command Center</h1>
+                <p class="text-gray-600">Overview and Management</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Visualization Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Resolution Progress -->
+        <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100 lg:col-span-1 flex flex-col justify-center">
+            <h3 class="text-lg font-bold text-gray-800 mb-2 font-poppins"><i class="fas fa-chart-line text-accent mr-2"></i>Resolution Rate</h3>
+            <p class="text-sm text-gray-500 mb-6">Percentage of issues fixed vs total reported</p>
+            
+            {% set total = stats.total_reported %}
+            {% set fixed = stats.fixed_issues %}
+            {% set percent = (fixed / total * 100)|int if total > 0 else 0 %}
+            
+            <div class="text-5xl font-extrabold text-navy text-center mb-4 count-up" data-target="{{ percent }}">%</div>
+            
+            <div class="w-full bg-gray-200 rounded-full h-4 shadow-inner overflow-hidden">
+                <div class="bg-gradient-to-r from-accent to-green-400 h-4 rounded-full transition-all duration-1000 ease-out" style="width: {{ percent }}%"></div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500 mt-2 font-semibold">
+                <span>0%</span>
+                <span>Fixed {{ fixed }} of {{ total }}</span>
+                <span>100%</span>
+            </div>
+        </div>
+        
+        <!-- Category Chart -->
+        <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100 lg:col-span-2">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 font-poppins"><i class="fas fa-chart-pie text-accent mr-2"></i>Issues by Category</h3>
+            <div class="h-64 w-full relative">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Issue Management Table -->
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+        <div class="p-6 border-b border-gray-100 bg-gray-50">
+            <h3 class="text-xl font-bold text-gray-800 font-poppins"><i class="fas fa-tasks text-accent mr-2"></i>Manage Reports</h3>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50/50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                        <th class="p-4 font-semibold">Issue Link/ID</th>
+                        <th class="p-4 font-semibold">Reporter</th>
+                        <th class="p-4 font-semibold">Category</th>
+                        <th class="p-4 font-semibold">Current Status</th>
+                        <th class="p-4 font-semibold text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+                    {% for issue in issues %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-4">
+                            <div class="font-bold text-gray-900">{{ issue.title }}</div>
+                            <div class="text-gray-500 text-xs">ID: {{ issue.id }} | {{ issue.created_at.strftime('%Y-%m-%d') }}</div>
+                        </td>
+                        <td class="p-4 font-medium text-gray-700">
+                            {{ issue.citizen_username }}
+                        </td>
+                        <td class="p-4">
+                            <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">{{ issue.category }}</span>
+                        </td>
+                        <td class="p-4">
+                            {% set status_class = issue.status | replace(' ', '.') %}
+                            <span class="bg-status-{{ status_class }} text-xs font-bold px-2 py-1 rounded shadow-sm whitespace-nowrap">
+                                {{ issue.status }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-right">
+                            <form action="{{ url_for('update_status', issue_id=issue.id) }}" method="POST" class="inline-flex items-center gap-2">
+                                <select name="status" class="bg-white border text-xs border-gray-300 rounded py-1.5 px-2 focus:ring-accent focus:border-accent shadow-sm">
+                                    <option value="Reported" {% if issue.status == 'Reported' %}selected{% endif %}>Reported</option>
+                                    <option value="Under Review" {% if issue.status == 'Under Review' %}selected{% endif %}>Under Review</option>
+                                    <option value="In Progress" {% if issue.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                    <option value="Fixed" {% if issue.status == 'Fixed' %}selected{% endif %}>Fixed</option>
+                                </select>
+                                <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white text-xs px-3 py-1.5 rounded shadow transition">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    
+                    {% if not issues %}
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-gray-500">
+                            No issues reported in the system.
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const categoryCounts = {
+            'Pothole': 0, 'Manhole': 0, 'Flooding': 0, 'Other': 0
+        };
+        
+        {% for iss in issues %}
+            if (categoryCounts["{{ iss.category }}"] !== undefined) {
+                categoryCounts["{{ iss.category }}"]++;
+            } else {
+                categoryCounts['Other']++;
+            }
+        {% endfor %}
+        
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(categoryCounts),
+                datasets: [{
+                    data: Object.values(categoryCounts),
+                    backgroundColor: [
+                        '#3B82F6', // Blue
+                        '#F59E0B', // Amber
+                        '#10B981', // Green
+                        '#64748B'  // Slate
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: { family: 'Inter', size: 13 }
+                        }
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}
