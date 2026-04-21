@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto fade-in">
+    <div class="text-center mb-10">
+        <h1 class="text-4xl font-extrabold text-navy font-poppins mb-2">🏆 Citizen Leaderboard</h1>
+        <p class="text-gray-500">Top civic heroes making their city better. Earn points by reporting issues and getting them fixed!</p>
+    </div>
+
+    <!-- Badge Guide -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
+        <div class="bg-white rounded-xl shadow-sm border p-3 text-center">
+            <div class="text-2xl mb-1">🌱</div>
+            <div class="font-bold text-sm text-gray-700">Newcomer</div>
+            <div class="text-xs text-gray-400">0–19 pts</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border p-3 text-center">
+            <div class="text-2xl mb-1">🔍</div>
+            <div class="font-bold text-sm text-gray-700">Reporter</div>
+            <div class="text-xs text-gray-400">20–49 pts</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border p-3 text-center">
+            <div class="text-2xl mb-1">⭐</div>
+            <div class="font-bold text-sm text-gray-700">Active Citizen</div>
+            <div class="text-xs text-gray-400">50–99 pts</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border p-3 text-center">
+            <div class="text-2xl mb-1">🏅</div>
+            <div class="font-bold text-sm text-gray-700">City Hero</div>
+            <div class="text-xs text-gray-400">100+ pts</div>
+        </div>
+    </div>
+
+    <!-- Top 3 Podium -->
+    {% if top_users|length >= 3 %}
+    <div class="flex items-end justify-center gap-4 mb-10">
+        <!-- 2nd Place -->
+        <div class="text-center w-36">
+            <div class="text-4xl mb-2">🥈</div>
+            <div class="bg-white rounded-2xl shadow-md p-4 border-2 border-gray-200">
+                <div class="text-3xl mb-1">{{ top_users[1].badge.split(' ')[0] }}</div>
+                <div class="font-extrabold text-gray-800 truncate">{{ top_users[1].username }}</div>
+                <div class="text-accent font-bold count-up-points" data-target="{{ top_users[1].points }}">0</div>
+                <div class="text-xs text-gray-400 mt-1">pts</div>
+            </div>
+            <div class="h-16 bg-gray-200 rounded-b-xl mx-4 mt-1 flex items-center justify-center text-gray-500 font-bold">2nd</div>
+        </div>
+        <!-- 1st Place (taller) -->
+        <div class="text-center w-40">
+            <div class="text-5xl mb-2">🥇</div>
+            <div class="bg-gradient-to-b from-yellow-50 to-white rounded-2xl shadow-xl p-5 border-2 border-yellow-300">
+                <div class="text-4xl mb-1">{{ top_users[0].badge.split(' ')[0] }}</div>
+                <div class="font-extrabold text-gray-900 text-lg truncate">{{ top_users[0].username }}</div>
+                <div class="text-yellow-600 font-extrabold text-xl count-up-points" data-target="{{ top_users[0].points }}">0</div>
+                <div class="text-xs text-gray-400 mt-1">pts</div>
+            </div>
+            <div class="h-24 bg-yellow-300 rounded-b-xl mx-4 mt-1 flex items-center justify-center text-gray-700 font-bold">1st</div>
+        </div>
+        <!-- 3rd Place -->
+        <div class="text-center w-36">
+            <div class="text-4xl mb-2">🥉</div>
+            <div class="bg-white rounded-2xl shadow-md p-4 border-2 border-orange-200">
+                <div class="text-3xl mb-1">{{ top_users[2].badge.split(' ')[0] }}</div>
+                <div class="font-extrabold text-gray-800 truncate">{{ top_users[2].username }}</div>
+                <div class="text-orange-500 font-bold count-up-points" data-target="{{ top_users[2].points }}">0</div>
+                <div class="text-xs text-gray-400 mt-1">pts</div>
+            </div>
+            <div class="h-10 bg-orange-200 rounded-b-xl mx-4 mt-1 flex items-center justify-center text-gray-500 font-bold">3rd</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Rank 4–10 Table -->
+    {% if top_users|length > 3 %}
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden mb-8">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500 border-b">
+                <tr>
+                    <th class="p-4 font-semibold">Rank</th>
+                    <th class="p-4 font-semibold">Citizen</th>
+                    <th class="p-4 font-semibold">Badge</th>
+                    <th class="p-4 font-semibold text-right">Points</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-sm">
+                {% for user in top_users[3:] %}
+                <tr class="hover:bg-gray-50 transition {% if session.get('user_id') == user.id %}bg-blue-50{% endif %}">
+                    <td class="p-4 font-bold text-gray-500">#{{ loop.index + 3 }}</td>
+                    <td class="p-4 font-semibold text-gray-800">{{ user.username }}</td>
+                    <td class="p-4 text-gray-600">{{ user.badge }}</td>
+                    <td class="p-4 text-right font-bold text-accent count-up-points" data-target="{{ user.points }}">0</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Your Rank Card -->
+    {% if session.get('user_id') and user_rank %}
+    <div class="bg-gradient-to-r from-navy to-blue-900 text-white rounded-2xl shadow-xl p-6 flex items-center justify-between">
+        <div>
+            <p class="text-gray-300 text-sm font-medium mb-1">Your Position</p>
+            <p class="text-3xl font-extrabold">#{{ user_rank }} <span class="text-xl font-medium text-gray-300">out of {{ total_citizens }}</span></p>
+            <p class="text-gray-400 mt-2 text-sm">{{ session.get('username') }} · <span class="text-accent font-semibold">{{ current_user_points }} pts</span></p>
+        </div>
+        <div class="text-6xl opacity-30"><i class="fas fa-trophy"></i></div>
+    </div>
+    {% endif %}
+</div>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/leaderboard.js') }}"></script>
+{% endblock %}
+{% endblock %}

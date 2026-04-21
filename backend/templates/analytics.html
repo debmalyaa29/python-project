@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto fade-in">
+    <div class="flex items-center gap-3 mb-8">
+        <div class="bg-purple-100 text-purple-600 p-3 rounded-xl border border-purple-200 shadow-sm">
+            <i class="fas fa-chart-bar text-2xl"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl font-extrabold text-navy font-poppins">Analytics Dashboard</h1>
+            <p class="text-gray-500">Infrastructure reporting trends and performance metrics.</p>
+        </div>
+    </div>
+
+    <!-- Key Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-xl shadow p-5 border-l-4 border-blue-500 hover:shadow-md transition">
+            <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide mb-1">Total Issues</p>
+            <div class="text-3xl font-extrabold text-gray-800">{{ total_issues }}</div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-5 border-l-4 border-green-500 hover:shadow-md transition">
+            <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide mb-1">Fixed Issues</p>
+            <div class="text-3xl font-extrabold text-green-700">{{ fixed_count }}</div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-5 border-l-4 border-amber-500 hover:shadow-md transition">
+            <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide mb-1">Avg Resolution</p>
+            <div class="text-3xl font-extrabold text-amber-700">{{ avg_days }}<span class="text-base font-medium text-gray-400 ml-1">days</span></div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-5 border-l-4 border-red-500 hover:shadow-md transition">
+            <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide mb-1">Top Category</p>
+            <div class="text-lg font-extrabold text-red-700 truncate">{{ top_category }}</div>
+        </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Issues by Category Doughnut -->
+        <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 font-poppins"><i class="fas fa-chart-pie text-accent mr-2"></i>Issues by Category</h3>
+            <div class="h-64 relative">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Issues by Status Bar -->
+        <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 font-poppins"><i class="fas fa-chart-bar text-accent mr-2"></i>Issues by Status</h3>
+            <div class="h-64 relative">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7 Day Trend Line -->
+    <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 font-poppins"><i class="fas fa-chart-line text-accent mr-2"></i>Issues Reported — Last 7 Days</h3>
+        <div class="h-64 relative">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Category Doughnut ---
+    const catData = {{ by_category | tojson | safe }};
+    const catLabels = catData.map(d => d[0]);
+    const catCounts = catData.map(d => d[1]);
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: catLabels,
+            datasets: [{ data: catCounts, backgroundColor: ['#3B82F6','#F59E0B','#10B981','#64748B'], borderWidth: 0 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '65%' }
+    });
+
+    // --- Status Bar ---
+    const statData = {{ by_status | tojson | safe }};
+    const statLabels = statData.map(d => d[0]);
+    const statCounts = statData.map(d => d[1]);
+    const statColors = statLabels.map(s => {
+        const m = {'Reported':'#EF4444','Under Review':'#F59E0B','In Progress':'#3B82F6','Fixed':'#10B981'};
+        return m[s] || '#64748B';
+    });
+    new Chart(document.getElementById('statusChart'), {
+        type: 'bar',
+        data: {
+            labels: statLabels,
+            datasets: [{ label: 'Issues', data: statCounts, backgroundColor: statColors, borderRadius: 8 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    // --- 7-Day Trend Line ---
+    const trendData = {{ seven_days | tojson | safe }};
+    new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+            labels: trendData.map(d => d.date),
+            datasets: [{
+                label: 'Issues Reported',
+                data: trendData.map(d => d.count),
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59,130,246,0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#3B82F6',
+                pointRadius: 5
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

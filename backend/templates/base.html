@@ -51,6 +51,7 @@
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
                         <a href="{{ url_for('index') }}" class="hover:text-accent px-3 py-2 rounded-md font-medium transition">Dashboard</a>
+                        <a href="{{ url_for('leaderboard') }}" class="hover:text-accent px-3 py-2 rounded-md font-medium transition">🏆 Leaderboard</a>
                         
                         {% if 'user_id' in session %}
                             <a href="{{ url_for('report_issue') }}" class="bg-accent hover:bg-blue-600 px-4 py-2 rounded-md font-medium transition shadow">
@@ -61,6 +62,9 @@
                             {% if session.get('role') == 'admin' %}
                                 <a href="{{ url_for('admin_panel') }}" class="hover:text-yellow-400 text-yellow-500 px-3 py-2 rounded-md font-medium transition">
                                     <i class="fas fa-tools"></i> Admin
+                                </a>
+                                <a href="{{ url_for('analytics') }}" class="hover:text-purple-400 text-purple-400 px-3 py-2 rounded-md font-medium transition">
+                                    <i class="fas fa-chart-bar"></i> Analytics
                                 </a>
                             {% endif %}
                             

@@ -2,6 +2,9 @@
 {% block title %}Report Issue{% endblock %}
 
 {% block content %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
 <div class="max-w-3xl mx-auto fade-in">
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
         
@@ -13,7 +16,7 @@
                 </div>
                 <div>
                     <h2 class="text-3xl font-extrabold font-poppins text-white">Report an Issue</h2>
-                    <p class="text-gray-300 mt-1">Found a hazard? Let the city know to get it fixed.</p>
+                    <p class="text-gray-300 mt-1">Found a hazard? Let the city know to get it fixed. Earn <span class="font-bold text-green-400">+10 points</span> for every report!</p>
                 </div>
             </div>
         </div>
@@ -31,22 +34,43 @@
                         <label for="category" class="block text-sm font-semibold text-gray-700 mb-1">Category</label>
                         <select id="category" name="category" required class="focus:ring-accent focus:border-accent w-full border-gray-300 rounded-lg py-3 px-4 bg-gray-50 border shadow-sm appearance-none">
                             <option value="" disabled selected>Select Category</option>
-                            <option value="Pothole">Pothole</option>
-                            <option value="Manhole">Manhole Cove Missing</option>
-                            <option value="Flooding">Flooding / Drainage</option>
-                            <option value="Other">Other</option>
+                            <option value="Pothole">🕳️ Pothole</option>
+                            <option value="Manhole">🔩 Manhole Cover Missing</option>
+                            <option value="Flooding">🌊 Flooding / Drainage</option>
+                            <option value="Other">⚠️ Other</option>
                         </select>
                     </div>
                     
+                    <!-- Location Field with GPS -->
                     <div>
                         <label for="location_text" class="block text-sm font-semibold text-gray-700 mb-1">Precise Location</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-map-marker-alt text-gray-400"></i>
+                        <div class="flex gap-2">
+                            <div class="relative flex-grow">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-map-marker-alt text-gray-400"></i>
+                                </div>
+                                <input type="text" id="location_text" name="location_text" required placeholder="123 Broad St or click GPS..." class="focus:ring-accent focus:border-accent block w-full pl-10 border-gray-300 rounded-lg py-3 px-4 bg-gray-50 border shadow-sm">
                             </div>
-                            <input type="text" id="location_text" name="location_text" required placeholder="123 Broad St..." class="focus:ring-accent focus:border-accent block w-full pl-10 border-gray-300 rounded-lg py-3 px-4 bg-gray-50 border shadow-sm">
+                            <!-- GPS Button -->
+                            <button type="button" id="gps-btn" title="Auto-detect my location"
+                                class="bg-accent hover:bg-blue-600 text-white font-semibold px-4 rounded-lg shadow transition flex items-center gap-2 whitespace-nowrap">
+                                <svg id="gps-spinner" class="animate-spin h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                <span id="gps-label">📍 GPS</span>
+                            </button>
                         </div>
+                        <!-- Hidden lat/lng inputs -->
+                        <input type="hidden" id="latitude" name="latitude">
+                        <input type="hidden" id="longitude" name="longitude">
                     </div>
+                </div>
+
+                <!-- GPS Map Preview -->
+                <div id="map-section" class="hidden">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">📍 Location Preview <span class="text-xs text-gray-400 font-normal">(drag the pin to adjust)</span></label>
+                    <div id="leaflet-map" class="h-56 w-full rounded-xl border border-gray-200 shadow-inner z-10"></div>
                 </div>
 
                 <div>
@@ -68,14 +92,13 @@
                             </div>
                             <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
                         </div>
-                        <!-- Provide a quick filename indicator (could use more JS) -->
                         <div id="file-name" class="absolute bottom-2 text-sm font-semibold text-accent hidden"></div>
                     </div>
                 </div>
                 
                 <div class="pt-4 border-t border-gray-100 flex justify-end">
-                    <button type="submit" onclick="this.innerHTML='<i class=\'fas fa-spinner fa-spin mr-2\'></i> Submitting...'" class="bg-gradient-to-r from-accent to-blue-600 border border-transparent rounded-lg shadow-md hover:shadow-lg text-white font-bold py-3 px-8 transition transform hover:-translate-y-0.5 w-full sm:w-auto">
-                        Submit Report
+                    <button type="submit" class="bg-gradient-to-r from-accent to-blue-600 border border-transparent rounded-lg shadow-md hover:shadow-lg text-white font-bold py-3 px-8 transition transform hover:-translate-y-0.5 w-full sm:w-auto">
+                        <i class="fas fa-paper-plane mr-2"></i> Submit Report
                     </button>
                 </div>
             </form>
@@ -83,6 +106,9 @@
     </div>
 </div>
 
+<!-- Leaflet + GPS JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/gps.js') }}"></script>
 <script>
     const fileInput = document.getElementById('image');
     const fileNameDisplay = document.getElementById('file-name');
