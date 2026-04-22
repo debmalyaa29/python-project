@@ -221,7 +221,12 @@ def report_issue():
         db.session.add(issue)
 
         # Award points to reporter
-        reporter = User.query.get(session['user_id'])
+        reporter = db.session.get(User, session['user_id'])
+        if not reporter:
+            session.clear()
+            flash('Your session has expired or is invalid. Please log in again.', 'error')
+            return redirect(url_for('login'))
+            
         reporter.points += POINTS_FOR_REPORT
         update_badge(reporter)
 
@@ -327,8 +332,11 @@ def analytics():
         flash('Access Denied.', 'error')
         return redirect(url_for('index'))
 
-    by_category = db.session.query(Issue.category, func.count(Issue.id)).group_by(Issue.category).all()
-    by_status = db.session.query(Issue.status, func.count(Issue.id)).group_by(Issue.status).all()
+    by_category_rows = db.session.query(Issue.category, func.count(Issue.id)).group_by(Issue.category).all()
+    by_category = [tuple(row) for row in by_category_rows]
+    
+    by_status_rows = db.session.query(Issue.status, func.count(Issue.id)).group_by(Issue.status).all()
+    by_status = [tuple(row) for row in by_status_rows]
 
     seven_days = []
     for i in range(6, -1, -1):
