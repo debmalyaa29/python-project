@@ -1,0 +1,22 @@
+--- USERS ---
+(1, 'admin', None, 'admin', 0, '🌱 Newcomer')
+(2, 'root2', None, 'citizen', 12, '🌱 Newcomer')
+(3, 'root1', None, 'citizen', 0, '🌱 Newcomer')
+(4, 'root3', None, 'citizen', 37, '🔍 Reporter')
+(5, 'admin1', None, 'admin', 0, '🌱 Newcomer')
+(6, 'root4', 'adcd@gmail.com', 'citizen', 14, '🌱 Newcomer')
+(7, 'root5', None, 'citizen', 39, '🔍 Reporter')
+
+--- ISSUES ---
+(1, 'there is a pothole in the main road near srm univ', 'Pothole', 'Under Review', 2)
+(2, 'there is manhole in the main road', 'Manhole', 'Fixed', 4)
+(3, 'pothole issue  near srm', 'Pothole', 'In Progress', 6)
+(4, 'pothole in main road near srm university', 'Pothole', 'Fixed', 7)
+
+--- VOTES ---
+(1, 1, 4)
+(2, 2, 6)
+(3, 3, 6)
+(4, 3, 5)
+(5, 4, 7)
+(6, 4, 5)
